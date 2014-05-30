@@ -3,6 +3,7 @@ import networkx as nx
 import os
 import sys
 import pickle
+import random
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,6 +53,18 @@ def main():
 
   # analysis
   # gutils.avgDegree(G)
+  nodes = g.nodes()
+  iters = 10
+
+  for _ in range(iters):
+    rand_node = random.choice(nodes)
+
+    # find a random business this user has rated
+
+    # calculate the avg rating of this user's friends who rated this business
+
+    # compare the values
+
 
 
 

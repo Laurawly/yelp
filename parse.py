@@ -3,6 +3,7 @@ import networkx as nx
 import os
 import sys
 import pickle
+import copy
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +14,7 @@ from collections import defaultdict
 
 import gutils
 import User
+import Review
 import community
 
 
@@ -55,7 +57,7 @@ def parseUserFile(filename):
     # remove newlines
     line = line.strip()
     user = parseJSON(line)
-    users[user['user_id']] = User.User(user)
+    users[user['user_id']] = review.Review(user)
 
   G = nx.Graph()
 
@@ -73,17 +75,73 @@ def parseUserFile(filename):
 
   return G
 
+
+
+def parseReviewFile(filename):
+  # kinda weird cause I'm generating users/businesses from here rather than
+  # the users of business files...
+
+  reviews = list()
+  users = set()
+  businesses = set()
+
+  with open(filename) as fp:
+    lines = fp.readlines()
+
+  for line in lines:
+    # remove newlines
+    line = line.strip()
+    review = parseJSON(line)
+    reviews.append(Review.Review(review))
+
+  G = nx.Graph()
+
+  # add all nodes
+  for r in reviews:
+    # check if new user
+    if r['user_id'] not in users:
+      users.add(r['user_id'])
+      G.add_node(r['user_id'], bipartite=0)
+
+    # check if new business
+    if r['business_id'] not in businesses:
+      businesses.add(r['business_id'])
+      G.add_node(r['business_id'], {'stars': 3.4}, bipartite=1)
+
+    # add the edge
+    G.add_edge(r['user_id'], r['business_id'], stars=r['stars'])
+
+  return G
+
+
+def parseBusinessFile(filename):
+  Biz = {}
+
+  with open(filename) as fp:
+    lines = fp.readlines()
+
+  for line in lines:
+    # remove newlines
+    line = line.strip()
+    business = parseJSON(line)
+    Biz[business['business_id']] = business['stars']
+
+  return Biz
+
+
 def calcCommunities(graph):
   partition = community.best_partition(graph)
   communities = {}
+  communities['byUser'] = partition.copy()
+  communities['byGroup'] = {}
 
   size = float(len(set(partition.values())))
   print "Total communities are: " + str(size)
-  count = 0.
+  count = 0
   for com in set(partition.values()) :
-      count = count + 1.
       list_nodes = [nodes for nodes in partition.keys() if partition[nodes] == com]
-      communities[count] = list_nodes
+      communities['byGroup'][count] = list_nodes
+      count = count + 1
 
   return communities
 
