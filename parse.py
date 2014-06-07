@@ -57,7 +57,7 @@ def parseUserFile(filename):
     # remove newlines
     line = line.strip()
     user = parseJSON(line)
-    users[user['user_id']] = review.Review(user)
+    users[user['user_id']] = User.User(user)
 
   G = nx.Graph()
 
@@ -78,6 +78,10 @@ def parseUserFile(filename):
 
 
 def parseReviewFile(filename):
+  '''
+  Return:
+  networkx bipartite graph of users to businesses
+  '''
   # kinda weird cause I'm generating users/businesses from here rather than
   # the users of business files...
 
@@ -115,6 +119,9 @@ def parseReviewFile(filename):
 
 
 def parseBusinessFile(filename):
+  '''
+  Create a dic where keys are business ID's and the value is the Yelp avg star
+  '''
   Biz = {}
 
   with open(filename) as fp:
@@ -130,6 +137,12 @@ def parseBusinessFile(filename):
 
 
 def calcCommunities(graph):
+  '''
+  BEWARE.  I'm not sure if byUser and byGroup have the same group_id keys
+  Return:
+  dict['byUser'] = dict where key is user_id and value is the group
+  dict['byGroup'] = dict where key is group_id and value is a list of users
+  '''
   partition = community.best_partition(graph)
   communities = {}
   communities['byUser'] = partition.copy()
