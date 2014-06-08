@@ -9,6 +9,10 @@ class Review(dict):
     for key in keys:
       del self[key]
 
+    # add 'u' and 'b' to end of ids
+    self['user_id'] +=  'u'
+    self['business_id'] +=  'b'
+
 
 
 

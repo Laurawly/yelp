@@ -8,3 +8,4 @@ class Business(dict):
     for k in self.keys():
       if k not in keep:
         del self[key]
+    self['business_id'] +=  'b'

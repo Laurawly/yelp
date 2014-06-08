@@ -38,12 +38,12 @@ def parseUser(filename):
     # remove newlines
     line = line.strip()
     user = parseJSON(line)
-    d[user['user_id']] = User.User(user)
+    d[user['user_id']+'u'] = User.User(user)
 
   return d
 
 
-def parseUserFile(filename):
+def parseUserFile(filename, ret_nx = True):
   """
   Load filename and parse into dictionary
   """
@@ -57,7 +57,7 @@ def parseUserFile(filename):
     # remove newlines
     line = line.strip()
     user = parseJSON(line)
-    users[user['user_id']] = User.User(user)
+    users[user['user_id']+'u'] = User.User(user)
 
   G = nx.Graph()
 
@@ -73,7 +73,10 @@ def parseUserFile(filename):
       # Note: we double add each edge, but that seems to be okay?
       G.add_edge(user_id, friend_id)
 
-  return G
+  if ret_nx:
+    return G
+  else:
+    return users
 
 
 
@@ -107,14 +110,16 @@ def parseReviewFile(filename):
       users.add(r['user_id'])
       G.add_node(r['user_id'], bipartite=0)
 
+  for r in reviews:
     # check if new business
     if r['business_id'] not in businesses:
       businesses.add(r['business_id'])
-      G.add_node(r['business_id'], {'stars': 3.4}, bipartite=1)
+      G.add_node(r['business_id'], bipartite=1)
 
     # add the edge
     G.add_edge(r['user_id'], r['business_id'], stars=r['stars'])
 
+  print stupid
   return G
 
 
@@ -131,7 +136,7 @@ def parseBusinessFile(filename):
     # remove newlines
     line = line.strip()
     business = parseJSON(line)
-    Biz[business['business_id']] = business['stars']
+    Biz[business['business_id']+'b'] = business['stars']
 
   return Biz
 

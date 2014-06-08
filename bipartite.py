@@ -1,3 +1,4 @@
+import collections
 import os
 import random
 import networkx as nx
@@ -42,6 +43,67 @@ def loadBusinesses():
   print 'done'
   return G
 
+
+def userProject2(B, users, bizes):
+  """
+  iterating over businsses
+  """
+  G = nx.Graph()
+  D = {}
+
+  # add all users to the graph
+
+  for user in users:
+    G.add_node(user)
+    D[user] = collections.defaultdict(int)
+
+  for i, biz in enumerate(bizes):
+    print "%s / %s" %(i, len(bizes))
+    reviewers = B.neighbors(biz)
+    for r in reviewers:
+      for r2 in reviewers:
+        D[r][r2] += 1
+
+  for i, user in enumerate(users):
+    print "u%s / %s" %(i, len(users))
+    for other in D[user]:
+      G.add_edge(user, other, weight=D[user][other])
+
+
+
+def userProject(B, users, bizes):
+  '''
+  Takes forever
+  '''
+  G = nx.Graph()
+  users = set(users)
+  print len(users)
+
+
+  # add all users to the graph
+  for user in users:
+    G.add_node(user)
+
+  # for each user, add an edge if we share any businesses
+  for i, user in enumerate(users):
+    print i
+    if i == 50:
+      import sys
+      sys.exit(1)
+    # remove users we are already connected to
+    # cur_neighbors = set(G.neighbors(user))
+    # leftover = users - cur_neighbors
+    for candidate in users:
+      # how many businesses do we share?
+      bus1 = set(B.neighbors(user))
+      bus2 = set(B.neighbors(candidate))
+      intersect = bus1.intersection(bus2)
+      if len(intersect):
+        G.add_edge(user, candidate, weight=len(intersect))
+
+  return G
+
+
 def loadProjection(B, filename = 'bi_proj.gpickle'):
   """
   Convert networkx bipartite graph to a one-mode projection.
@@ -53,8 +115,9 @@ def loadProjection(B, filename = 'bi_proj.gpickle'):
     print "Calculating Projection"
     # ratio?
     user_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
-
-    G = nx.algorithms.bipartite.weighted_projected_graph(B, user_nodes)
+    biz_nodes = set(B) - user_nodes
+    G = userProject2(B, user_nodes, biz_nodes)
+    # G = nx.algorithms.bipartite.weighted_projected_graph(B, user_nodes)
 
     # write to file to save for later
     nx.write_gpickle(G, filename)

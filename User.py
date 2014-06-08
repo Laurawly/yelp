@@ -8,3 +8,4 @@ class User(dict):
             u'type', u'fans', u'average_stars', u'compliments', u'elite']
     for key in keys:
       del self[key]
+    self['user_id'] +=  'u'
