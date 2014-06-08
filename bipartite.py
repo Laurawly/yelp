@@ -21,6 +21,7 @@ def loadBipartite():
     nx.write_gpickle(G, 'bipartite.gpickle')
     # nx.write_dot(G, 'yelp_data.dot')
 
+  print 'done'
   return G
 
 
@@ -38,7 +39,29 @@ def loadBusinesses():
     with open(filename, "w") as fp:
       pickle.dump(G, fp)
 
+  print 'done'
   return G
+
+def loadProjection(B, filename = 'bi_proj.gpickle'):
+  """
+  Convert networkx bipartite graph to a one-mode projection.
+  """
+  if os.path.exists(filename):
+    print "Reading proj from pickle file"
+    G = nx.read_gpickle(filename)
+  else:
+    print "Calculating Projection"
+    # ratio?
+    user_nodes = set(n for n,d in B.nodes(data=True) if d['bipartite']==0)
+
+    G = nx.algorithms.bipartite.weighted_projected_graph(B, user_nodes)
+
+    # write to file to save for later
+    nx.write_gpickle(G, filename)
+
+  print 'done'
+  return G
+
 
 def main():
   # load file

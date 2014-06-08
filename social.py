@@ -27,8 +27,8 @@ def loadSocialNetwork():
 
     # write to file to save for later
     nx.write_gpickle(G, 'social_network.gpickle')
-    # nx.write_dot(G, 'yelp_data.dot')
 
+  print 'done'
   return G
 
 def loadCommunity(graph, filename = 'communitiy.pickle'):
@@ -44,6 +44,7 @@ def loadCommunity(graph, filename = 'communitiy.pickle'):
     with open(filename, "w") as fp:
       pickle.dump(C, fp)
 
+  print 'done'
   return C
 
 def main():
