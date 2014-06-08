@@ -9,6 +9,7 @@ import pickle
 import parse
 import social
 import community
+import algs
 
 def loadBipartite(ratio=1.0):
   if os.path.exists('bipartite.pickle'):
@@ -92,9 +93,6 @@ def userProject(B, users, bizes):
   # for each user, add an edge if we share any businesses
   for i, user in enumerate(users):
     print i
-    if i == 50:
-      import sys
-      sys.exit(1)
     # remove users we are already connected to
     # cur_neighbors = set(G.neighbors(user))
     # leftover = users - cur_neighbors
@@ -132,12 +130,36 @@ def loadProjection(B, filename = 'bi_proj.pickle'):
 
 def roundrating(x): return 0.5 * round(2.0 * x)
 
+
+def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
+  '''
+  remove nodes less than a certain degree
+  in: G networkx graph
+  out: networkx graph
+  '''
+  it = G.degree_iter()
+  for node, degree in G.degree_iter():
+    if node[-1] == 'u':
+      if degree < user_threshold:
+        G.remove_node(node)
+    else:
+      if degree < business_threshold:
+        G.remove_node(node)
+  return G
+
+
+
+
 def main():
   # load file
-  B = loadBipartite(0.2)
+  B = loadBipartite(0.1)
   proj = loadProjection(B)
-  C = social.loadCommunity(proj, 'B_community.pickle')
+  # C = social.loadCommunity(proj, 'B_community.pickle')
   Biz = loadBusinesses()
+
+  copra = algs.Copra(proj, filename='copra10.txt')
+  copra.run()
+  C = copra.loadCommunity()
 
   user_nodes = [n for n,d in B.nodes(data=True) if d['bipartite']==0]
   biz_nodes = set(B) - set(user_nodes)
