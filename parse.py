@@ -80,8 +80,10 @@ def parseUserFile(filename, ret_nx = True):
 
 
 
-def parseReviewFile(filename):
+def parseReviewFile(filename, ratio=1.0):
   '''
+  Input:
+  ratio - percentage of reviews to do
   Return:
   networkx bipartite graph of users to businesses
   '''
@@ -95,6 +97,9 @@ def parseReviewFile(filename):
   with open(filename) as fp:
     lines = fp.readlines()
 
+  print len(lines)
+  lines = lines[:int(len(lines) * ratio)]
+  print len(lines)
   for line in lines:
     # remove newlines
     line = line.strip()

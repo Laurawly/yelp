@@ -21,7 +21,7 @@ class Copra():
       # write "user_id bus_id"
       fp.write("%s %s\n" % (e[0], e[1]))
 
-    cmd = "java -cp %s COPRA %s %s -mo -repeat 10" % \
+    cmd = "java -cp %s COPRA %s %s -mo" % \
           (os.path.join(CWD, 'algorithms', 'copra.jar'), fp.name,
            '-bi' if self.bipartite else '')
 

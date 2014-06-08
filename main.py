@@ -1,19 +1,19 @@
 import networkx as nx
-import pickle
 
 # local
 import social
 import bipartite
 import algs
 import parse
+import toigraph
+
 
 def main():
   # load file
-  B = bipartite.loadBipartite()
+  B = bipartite.loadBipartite(0.2)
 
   proj = bipartite.loadProjection(B)
-
-  # community = social.loadCommunity(proj, 'B_community.pickle')
+  i_proj = toigraph.toIGraph(proj)
 
 
 if __name__ == '__main__':

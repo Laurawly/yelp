@@ -18,15 +18,15 @@ import community
 import parse
 
 def loadSocialNetwork():
-  if os.path.exists('social_network.gpickle'):
+  if os.path.exists('social_network.pickle'):
     print "Reading from pickle file"
-    G = nx.read_gpickle('social_network.gpickle')
+    G = nx.read_gpickle('social_network.pickle')
   else:
     print "Parsing raw JSON"
     G = parse.parseUserFile('data/yelp_academic_dataset_user.json')
 
     # write to file to save for later
-    nx.write_gpickle(G, 'social_network.gpickle')
+    nx.write_gpickle(G, 'social_network.pickle')
 
   print 'done'
   return G
