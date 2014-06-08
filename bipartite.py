@@ -69,6 +69,8 @@ def userProject2(B, users, bizes):
     for other in D[user]:
       G.add_edge(user, other, weight=D[user][other])
 
+  return G
+
 
 
 def userProject(B, users, bizes):
