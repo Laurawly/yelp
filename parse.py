@@ -119,7 +119,6 @@ def parseReviewFile(filename):
     # add the edge
     G.add_edge(r['user_id'], r['business_id'], stars=r['stars'])
 
-  print stupid
   return G
 
 
