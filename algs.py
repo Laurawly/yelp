@@ -26,7 +26,7 @@ class Copra():
         return
       else:
         # we have input file but no clusters
-        cmd = "java -cp %s COPRA %s %s -mo" % \
+        cmd = "java -cp %s COPRA %s %s -w" % \
               (os.path.join(CWD, 'algorithms', 'copra.jar'), self.filename,
                '-bi' if self.bipartite else '')
         print cmd
@@ -37,12 +37,12 @@ class Copra():
         fp = open(os.path.join(CWD, self.filename), 'w')
       else:
         fp = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
-      for e in self.graph.edges():
+      for e in self.graph.edges(data=True):
         # write "user_id bus_id"
-        fp.write("%s %s\n" % (e[0], e[1]))
+        fp.write("%s %s %s\n" % (e[0], e[1], e[2]['weight']*5))
       fp.close()
 
-      cmd = "java -cp %s COPRA %s %s -mo" % \
+      cmd = "java -cp %s COPRA %s %s -w" % \
             (os.path.join(CWD, 'algorithms', 'copra.jar'), fp.name,
              '-bi' if self.bipartite else '')
 
