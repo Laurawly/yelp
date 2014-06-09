@@ -31,15 +31,16 @@ def hits_score(R,B):
       u[i]*=s
     # User to Business
     for i in b:
-      TotalWeight = 0
-      newStar = 0
+      TotalWeight = 0.
+      newStar = 0.
       for j in R.neighbors(i):
-        newStar += u[j]*(R.get_edge_data(j,i)['stars'])
-        TotalWeight += u[j]
-      newStar = newStar/(TotalWeight)
-      if abs(b[i]-newStar)/float(b[i]) <= 0.01: 
-        score_diff += 1
-      b[i] = newStar
+        newStar += float(u[j]*(R.get_edge_data(j,i)['stars']))
+        TotalWeight += float(u[j])
+      if TotalWeight != 0:
+        newStar = newStar/float(TotalWeight)
+        if abs(b[i]-newStar)/float(b[i]) <= 0.01: 
+          score_diff += 1
+        b[i] = newStar
     # scale user credibility to a max of 5
     max_val=max(u.values())
     for i in u:

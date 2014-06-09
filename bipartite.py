@@ -10,6 +10,7 @@ import parse
 import social
 import community
 import algs
+import HITS
 
 def loadBipartite(ratio=1.0):
   if os.path.exists('bipartite.pickle'):
@@ -65,7 +66,7 @@ def userProject2(B, users, bizes, threshold=0.1):
     D[user] = collections.defaultdict(int)
 
   for count, biz in enumerate(bizes):
-    print "%s / %s" %(count, len(bizes))
+#print "%s / %s" %(count, len(bizes))
     reviewers = B.neighbors(biz)
 
     for i in range(len(reviewers)):
@@ -77,12 +78,12 @@ def userProject2(B, users, bizes, threshold=0.1):
     del D[user][user]
 
   for i, user in enumerate(users):
-    print "u%s / %s" %(i, len(users))
+#print "u%s / %s" %(i, len(users))
     edges = []
     for other in D[user]:
       jac = calculateJaccard(D, B, user, other)
       if jac > threshold:
-        edges.append((user, other, D[user][other]))
+        edges.append((user, other, jac))
     G.add_weighted_edges_from(edges)
 
 
@@ -176,7 +177,7 @@ def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
 def main():
   # load file
   B = loadBipartite()
-  B = shrinkNetworkx(B)
+#B = shrinkNetworkx(B)
   proj = loadProjection(B)
   # C = social.loadCommunity(proj, 'B_community.pickle')
   Biz = loadBusinesses()
@@ -189,6 +190,7 @@ def main():
   # biz_nodes = set(B) - set(user_nodes)
   user_nodes = proj.nodes()
 
+  user_credibility, b_new_score = HITS.hits_score(B,Biz)
 
 
   # analysis
@@ -228,10 +230,15 @@ def main():
         continue
 
       total = 0.
+      totalCredibility = 0.
+      for p in peers:
+        totalCredibility += user_credibility[p]
+        
       for p in peers:
         edge = B.get_edge_data(p, business)
-        total += edge['stars']
-      avg_peer_value = roundrating(total / len(peers))
+        total += edge['stars']*user_credibility[p]/totalCredibility
+# avg_peer_value = roundrating(total / len(peers))
+      avg_peer_value = total
       # print "avg value of peers(%s): %s" % (len(peers), avg_peer_value)
 
       # compare the values
@@ -249,9 +256,11 @@ def main():
   print np.median(num_peers),
   print np.mean(num_peers),
   print np.std(num_peers)
+
   print np.median(diff_peer),
   print np.mean(diff_peer),
   print np.std(diff_peer)
+  
   print np.median(diff_yelp),
   print np.mean(diff_yelp),
   print np.std(diff_yelp)
