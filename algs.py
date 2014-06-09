@@ -5,7 +5,6 @@ import tempfile
 import cPickle as pickle
 
 
-import toigraph
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 
@@ -89,65 +88,65 @@ class Copra():
 
 
 
-class IGFastGreedy():
-  '''
-  '''
-  def __init__(self, G, filename='fast_greedy.pickle'):
-    self.graph = G
-    self.filename = filename
+# class IGFastGreedy():
+#   '''
+#   '''
+#   def __init__(self, G, filename='fast_greedy.pickle'):
+#     self.graph = G
+#     self.filename = filename
 
-  def run(self):
-    i_proj = toigraph.toIGraph(self.graph)
+#   def run(self):
+#     i_proj = toigraph.toIGraph(self.graph)
 
-    print 'computing igraph community_fastgreedy'
-    C = i_proj.community_fastgreedy()
-    print 'done'
+#     print 'computing igraph community_fastgreedy'
+#     C = i_proj.community_fastgreedy()
+#     print 'done'
 
-    # save to file
-    # write to file to save for later
-    if self.filename:
-      with open(self.filename, "w") as fp:
-        pickle.dump(C, fp)
+#     # save to file
+#     # write to file to save for later
+#     if self.filename:
+#       with open(self.filename, "w") as fp:
+#         pickle.dump(C, fp)
 
-class IGLabelProp():
-  '''
-  '''
-  def __init__(self, G, filename='label_propagation.pickle'):
-    self.graph = G
-    self.filename = filename
+# class IGLabelProp():
+#   '''
+#   '''
+#   def __init__(self, G, filename='label_propagation.pickle'):
+#     self.graph = G
+#     self.filename = filename
 
-  def run(self):
-    i_proj = toigraph.toIGraph(self.graph)
+#   def run(self):
+#     i_proj = toigraph.toIGraph(self.graph)
 
-    print 'computing igraph label_propagation'
-    C = i_proj.community_label_propagation(weights='weight')
-    print 'done'
+#     print 'computing igraph label_propagation'
+#     C = i_proj.community_label_propagation(weights='weight')
+#     print 'done'
 
-    # save to file
-    # write to file to save for later
-    if self.filename:
-      with open(self.filename, "w") as fp:
-        pickle.dump(C, fp)
+#     # save to file
+#     # write to file to save for later
+#     if self.filename:
+#       with open(self.filename, "w") as fp:
+#         pickle.dump(C, fp)
 
 
-class IGEdgeBetweennes():
-  '''
-  '''
-  def __init__(self, G, filename='edge_betweenness.pickle'):
-    self.graph = G
-    self.filename = filename
+# class IGEdgeBetweennes():
+#   '''
+#   '''
+#   def __init__(self, G, filename='edge_betweenness.pickle'):
+#     self.graph = G
+#     self.filename = filename
 
-  def run(self):
-    i_proj = toigraph.toIGraph(self.graph)
+#   def run(self):
+#     i_proj = toigraph.toIGraph(self.graph)
 
-    print 'computing igraph edge_betweenness'
-    C = i_proj.community_edge_betweenness(weights='weight')
-    print 'done'
+#     print 'computing igraph edge_betweenness'
+#     C = i_proj.community_edge_betweenness(weights='weight')
+#     print 'done'
 
-    # save to file
-    # write to file to save for later
-    if self.filename:
-      with open(self.filename, "w") as fp:
-        pickle.dump(C, fp)
+#     # save to file
+#     # write to file to save for later
+#     if self.filename:
+#       with open(self.filename, "w") as fp:
+#         pickle.dump(C, fp)
 
 

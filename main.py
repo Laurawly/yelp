@@ -5,7 +5,6 @@ import social
 import bipartite
 import algs
 import parse
-import toigraph
 
 
 def main():
@@ -23,13 +22,13 @@ def main():
   print proj.number_of_nodes()
   print proj.number_of_edges()
 
-  # fast_greedy = algs.IGEdgeBetweennes(proj)
-  # fast_greedy.run()
+  fast_greedy = algs.IGEdgeBetweennes(proj)
+  fast_greedy.run()
 
 
-  copra = algs.Copra(proj, filename='copra10.txt')
-  copra.run()
-  comm = copra.loadCommunity()
+  # copra = algs.Copra(proj, filename='copra10.txt')
+  # copra.run()
+  # comm = copra.loadCommunity()
   # print len(comm.keys())
   # print len(comm.values())
 

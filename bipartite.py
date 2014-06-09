@@ -185,13 +185,14 @@ def main():
   copra.run()
   C = copra.loadCommunity()
 
-  user_nodes = [n for n,d in B.nodes(data=True) if d['bipartite']==0]
-  biz_nodes = set(B) - set(user_nodes)
+  # user_nodes = [n for n,d in B.nodes(data=True) if d['bipartite']==0]
+  # biz_nodes = set(B) - set(user_nodes)
+  user_nodes = proj.nodes()
 
 
 
   # analysis
-  iteration = 10000
+  iteration = 1000
 
   diff_peer = []
   diff_yelp = []
