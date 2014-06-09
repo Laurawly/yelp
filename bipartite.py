@@ -161,8 +161,8 @@ def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
   in: G networkx graph
   out: networkx graph
   '''
-  it = G.degree_iter()
-  for node, degree in G.degree_iter():
+  # it = G.degree_iter()
+  for node, degree in G.degree().items():
     if node[-1] == 'u':
       if degree < user_threshold:
         G.remove_node(node)
@@ -179,12 +179,12 @@ def main():
   B = loadBipartite()
 #B = shrinkNetworkx(B)
   proj = loadProjection(B)
-  # C = social.loadCommunity(proj, 'B_community.pickle')
+  C = social.loadCommunity(proj, 'networkx_community.pickle')
   Biz = loadBusinesses()
 
-  copra = algs.Copra(proj, filename='copra10.txt')
-  copra.run()
-  C = copra.loadCommunity()
+  # copra = algs.Copra(proj, filename='copra10.txt')
+  # copra.run()
+  # C = copra.loadCommunity()
 
   # user_nodes = [n for n,d in B.nodes(data=True) if d['bipartite']==0]
   # biz_nodes = set(B) - set(user_nodes)
