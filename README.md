@@ -1,14 +1,14 @@
 orig bipartite graph has:
-86396 nodes
-322906 edges
+86,396 nodes
+322,906 edges
 
 bipartite shrink(10,10) has:
-10083
-153564
+10,083
+153,564
 
 bipartite shrink(20,20) has:
-4866
-96860
+4,866
+96,860
 
 
 projection, shrink(10,10) jaccard
