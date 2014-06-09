@@ -38,7 +38,7 @@ def hits_score(R,B):
         TotalWeight += float(u[j])
       if TotalWeight != 0:
         newStar = newStar/float(TotalWeight)
-        if abs(b[i]-newStar)/float(b[i]) <= 0.01: 
+        if abs(b[i]-newStar)/float(b[i]) <= 0.001: 
           score_diff += 1
         b[i] = newStar
     # scale user credibility to a max of 5
@@ -46,7 +46,7 @@ def hits_score(R,B):
     for i in u:
       u[i]=u[i]/float(max_val) * 5
     # Stopping Criteria
-    if score_diff / float(len(business)) >= 0.95:
+    if score_diff / float(len(business)) >= 0.99:
       print score_diff 
       print len(business)
       break

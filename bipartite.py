@@ -177,7 +177,7 @@ def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
 def main():
   # load file
   B = loadBipartite()
-#B = shrinkNetworkx(B)
+  B = shrinkNetworkx(B)
   proj = loadProjection(B)
   C = social.loadCommunity(proj, 'networkx_community.pickle')
   Biz = loadBusinesses()
@@ -194,17 +194,20 @@ def main():
 
 
   # analysis
-  iteration = 1000
+  iteration = 10000
 
   diff_peer = []
   diff_yelp = []
   num_peers = []
+  diff_biz = []
   for _ in range(iteration):
     while True:
       # loop until we find an acceptable user-business pair
 
       rand_node = random.choice(user_nodes)
       community = C['byUser'][rand_node]
+      if len(C['byGroup'][community]) < 100:
+          continue
 
       # 1. find a random business this user has rated
       businesses = B.neighbors(rand_node)
@@ -217,30 +220,43 @@ def main():
       # 2. calculate the avg rating of this user's friends who rated this business
       raters = B.neighbors(business)
       peers = []
-
+      outsiders = []
       for rater in raters:
         if rater == rand_node:
           continue
         if rater in C['byGroup'][community]:
           # found a match!
           peers.append(rater)
+        else: outsiders.append(rater)
 
       if len(peers) == 0:
         # didn't find any friends who rated this place
         continue
+      if len(outsiders) == 0:
+        continue
 
       total = 0.
+      o_total = 0.
       totalCredibility = 0.
+      o_totalCredibility = 0.
       for p in peers:
         totalCredibility += user_credibility[p]
-        
       for p in peers:
         edge = B.get_edge_data(p, business)
+#        total += edge['stars']
         total += edge['stars']*user_credibility[p]/totalCredibility
-# avg_peer_value = roundrating(total / len(peers))
-      avg_peer_value = total
+#avg_peer_value = roundrating(total / len(peers))
+      for p in outsiders:
+        o_totalCredibility += user_credibility[p]
+      for p in outsiders:
+        edge = B.get_edge_data(p, business)
+        o_total += edge['stars']*user_credibility[p]/o_totalCredibility
+#o_total += edge['stars']
+      avg_peer_value = total*0.55+o_total*0.45
+#avg_peer_value = 0.5*roundrating(total / len(peers))+0.5*roundrating(o_total / len(outsiders))
+#      avg_peer_value = roundrating((total+o_total) / (len(peers)+len(outsiders)))
       # print "avg value of peers(%s): %s" % (len(peers), avg_peer_value)
-
+      
       # compare the values
       edge = B.get_edge_data(rand_node, business)
       # print "my value: %s" % edge['stars']
@@ -248,11 +264,11 @@ def main():
       num_peers.append(len(peers))
       diff_peer.append(abs(edge['stars'] - avg_peer_value))
       diff_yelp.append(abs(edge['stars'] - Biz[business]))
-
+      diff_biz.append(abs(edge['stars'] - b_new_score[business]))
+      
 
       # found succesful!
       break
-
   print np.median(num_peers),
   print np.mean(num_peers),
   print np.std(num_peers)
@@ -266,7 +282,9 @@ def main():
   print np.std(diff_yelp)
 
 
-
+  print np.median(diff_biz),
+  print np.mean(diff_biz),
+  print np.std(diff_biz)
 
 
 
