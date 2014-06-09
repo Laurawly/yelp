@@ -35,12 +35,13 @@ class Copra():
     else:
       # Write graph to a tempfile
       if self.filename:
-        fp = open(self.filename, 'w')
+        fp = open(os.path.join(CWD, self.filename), 'w')
       else:
         fp = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
       for e in self.graph.edges():
         # write "user_id bus_id"
         fp.write("%s %s\n" % (e[0], e[1]))
+      fp.close()
 
       cmd = "java -cp %s COPRA %s %s -mo" % \
             (os.path.join(CWD, 'algorithms', 'copra.jar'), fp.name,
@@ -49,7 +50,6 @@ class Copra():
       print cmd
       subprocess.call(cmd, shell=True)
       self.filename = fp.name.split('/')[-1]
-      fp.close()
 
 
   def calcCommunities(self):
@@ -109,5 +109,45 @@ class IGFastGreedy():
       with open(self.filename, "w") as fp:
         pickle.dump(C, fp)
 
+class IGLabelProp():
+  '''
+  '''
+  def __init__(self, G, filename='label_propagation.pickle'):
+    self.graph = G
+    self.filename = filename
+
+  def run(self):
+    i_proj = toigraph.toIGraph(self.graph)
+
+    print 'computing igraph label_propagation'
+    C = i_proj.community_label_propagation(weights='weight')
+    print 'done'
+
+    # save to file
+    # write to file to save for later
+    if self.filename:
+      with open(self.filename, "w") as fp:
+        pickle.dump(C, fp)
+
+
+class IGEdgeBetweennes():
+  '''
+  '''
+  def __init__(self, G, filename='edge_betweenness.pickle'):
+    self.graph = G
+    self.filename = filename
+
+  def run(self):
+    i_proj = toigraph.toIGraph(self.graph)
+
+    print 'computing igraph edge_betweenness'
+    C = i_proj.community_edge_betweenness(weights='weight')
+    print 'done'
+
+    # save to file
+    # write to file to save for later
+    if self.filename:
+      with open(self.filename, "w") as fp:
+        pickle.dump(C, fp)
 
 

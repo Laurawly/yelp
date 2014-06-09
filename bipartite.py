@@ -45,7 +45,13 @@ def loadBusinesses():
   return G
 
 
-def userProject2(B, users, bizes):
+def calculateJaccard(adj_matrix, B, user1, user2):
+  intersect = adj_matrix[user1][user2]
+  union = len(B.neighbors(user1)) + len(B.neighbors(user2))
+  return float(intersect) / union
+
+
+def userProject2(B, users, bizes, threshold=0.1):
   """
   iterating over businsses
   """
@@ -63,13 +69,30 @@ def userProject2(B, users, bizes):
     reviewers = B.neighbors(biz)
 
     for i in range(len(reviewers)):
-      for j in range(i+1, len(reviewers)):
+      for j in range(len(reviewers)):
         D[reviewers[i]][reviewers[j]] += 1
+
+  # set all i==j to be zero
+  for user in users:
+    del D[user][user]
 
   for i, user in enumerate(users):
     print "u%s / %s" %(i, len(users))
-    edges = [(user, other, D[user][other] ) for other in D[user]]
+    edges = []
+    for other in D[user]:
+      jac = calculateJaccard(D, B, user, other)
+      if jac > threshold:
+        edges.append((user, other, D[user][other]))
     G.add_weighted_edges_from(edges)
+
+
+  # remove nodes without any edges?
+  outdeg = G.degree()
+  to_remove = [n for n in outdeg if outdeg[n] == 0]
+  G.remove_nodes_from(to_remove)
+
+    # edges = [(user, other, D[user][other] ) for other in D[user]]
+    # G.add_weighted_edges_from(edges)
     # for other in D[user]:
       # G.add_edge(user, other, weight=D[user][other])
 
@@ -152,7 +175,8 @@ def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
 
 def main():
   # load file
-  B = loadBipartite(0.1)
+  B = loadBipartite()
+  B = shrinkNetworkx(B)
   proj = loadProjection(B)
   # C = social.loadCommunity(proj, 'B_community.pickle')
   Biz = loadBusinesses()
