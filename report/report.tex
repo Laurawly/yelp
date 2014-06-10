@@ -1,0 +1,129 @@
+\documentclass[10pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{setspace}
+\usepackage{biblatex} % A library for bibliography commands.
+
+\doublespacing
+
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\textheight}{8.5in}
+
+
+\title{ECS 289F - Network Theory and Applications\\ Communities for A Better Yelp }
+\author{Leyuan Wang and Edmund Yan}
+
+\bibliography{report}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Yelp.com, has become a cornerstone of the internet we know today, yet it lacks the basic features of personalization.  In this paper, we implement a new method for calculating business ratings that is based on community detection.  We place users into communities of like-minded people, and see if they provide a better predictor of what a user will rate a business.  It turns out though, that counter to our original thoughts, the consensus of those in your community are no better predictors than the consensus of the rest of the population and in fact, can be worse because of the small sample size.
+\end{abstract}
+
+
+\section{Introduction}
+
+Yelp is a website that provides business listings and allows customers to write reviews for ratings.  It has become an immensely popular website, climbing to being the 28th most popular website in the United States \cite{AlexaYelp}.  Part of its success can be attributed to their focus on building a great internal community of "Yelpers" through combining elements of social networking with friends and incentivizing users with badges and "Yelp Elite" status, an invite-only exclusive club.  Yelpers rate businesses by giving them stars in the range of 1 to 5 and the business has an average rating that is shown to users.
+
+We think we can do a better job at providing a rating to users than just an average.  Yelp has accumulated a wealth of information on businesses, users, and activities between them, yet they use none of that information in providing better results for users.  Our approach will be to use community detection methods to analyze the social graph of friends and also the bipartite network of users to businesses to give a more personalized result.  Our hypothesis is that people in your community know what you like more than the rest of the population.  So if all of your friends are are raving about a particular restaurant, we think this will make it more likely that you will enjoy the restaurant as well.  Additionally, by analyzing the bipartite network, we can potentially unveil interesting pairings that would otherwise not be apparent.  Users who frequently visit the same restaurants as a particular user, shows a starking similarity in their food preferences.  We think that by categorizing users to communities, we can give more weight to the ratings from other users in the same community and thus provide a more accurate business rating.
+
+Section~\ref{sec:prevwork} will discuss some of the previous work in community detection.  Section~\ref{sec:data} will give a general overview of our dataset. We will present our methods in Section~\ref{sec:method} with results in \ref{sec:results}.  Finally, we will conclude and discuss future work in this area in Section~\ref{sec:conclusion}
+
+
+\section{Previous Work}
+\label{sec:prevwork}
+TODO
+
+TODO: Do we need to rewrite this since we use much different community detection algorithms?
+
+
+
+
+For this project, were going to be focusing on two main aspects of the Yelp data. First will be
+the social network of Yelp users and their friends. The second will be the bipartite network
+connecting users and businesses, where edges are reviews by that user to the business
+in question. After detecting communities in this two graphs, we are going to personalize
+the business stars according to which community the user is in. For the first part, we found different models
+for community detection. In \cite{fortunato2010community}, they give a thorough exposition of community detection methods. In \cite{newman2004finding}, several community detection methods like natural divisions of network nodes
+into densely connected subgroups, are studied. The algorithm involves iterative removal
+of edges from the network, and the connected components of the remaining network are the communities. For the second part, In \cite{liu2009community}, they proposed a fast algorithm called LP\&BRIM for community detection in large-scale bipartite networks. It is based on a joint strategy of two developed algorithms -- label propagation (LP), a very fast community detection algorithm, and BRIM, an algorithm for generating better community structure by recursively inducing divisions between the two types of nodes in bipartite networks. And this algorithm successfully finds meaningful community structures in large-scale bipartite networks in reasonable time limit. But there's a limit of time to implement their algorithm. If we evaluate the user directly instead of the reviews she wrote, the bipartite structure between users and businesses will be similar to the hub and authority set-up in HITS.
+
+
+
+\section{Data}
+\label{sec:data}
+
+Yelp has provided an academic dataset that contains a sample of their data from Phoenix, Arizona.  This dataset has 15,185 total businesses, 335,022 reviews, 70,817 users, and a slew of other information that we don't track in this study.  We construct two graphs from this data.  The first is a social network of users and their friends, with the 70,817 nodes, 151,516 edges and an average degree of 4.279.  As seen in the degree distribution of Figure~\ref{fig:social_degree}, the graph is scale-free and follows a power law distribution.
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.5\textwidth]{soc_degree_distribution.png}
+  \caption{Degree distribution of social network}
+  \label{fig:social_degree}
+\end{figure}
+
+
+The second is a bipartite graph of users and businesses, with an edge connecting between them signifying that user has rated the business.  The weight on the edge is the 'star' attribute associated with that rating.  As said above, there were 70,817 users, with an average degree of 4.560, and 15,579 businesses, with an average degree of 20.727. Figures~\ref{fig:bipartite_degree_user}/\ref{fig:bipartite_degree_biz} shows the distribution for both types of nodes.
+
+\begin{figure}[ht]
+\minipage{0.49\textwidth}
+\includegraphics[scale=.4]{user_degree_distribution.png} 
+\caption{Degree Distribution of Users}
+\label{fig:bipartite_degree_user}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[scale=.4]{biz_degree_distribution.png}
+\caption{Degree Distribution of Businesses}
+\label{fig:bipartite_degree_biz}
+\endminipage\hfill
+\end{figure}
+
+We actually use a shrunken version of both graphs because of computational restrictions, which we will discuss later.
+
+\section{Bipartite Graph}
+\label{sec:bipartite}
+
+We first take a look at the bipartite graph of users and businesses.  In order to do community detection of users on this graph, we do a one-mode projection onto the Users.  Simply, if user A and user B both rate a business X, we add an edge between A and B in the projected graph.  The new graph only has user nodes.  This algorithm leads to an immensely dense graph, with a basic projection of the original bipartite graph having 2,945,687 edges with only 70,817 nodes.  We attempted community detection algorithms on this graph, but they were both highly time consuming and produced bad community results.  We thus add two methods to shrink this projection into a more usable graph.
+
+\subsection{Shrink}
+In shrink, we remove nodes (both users and businesses) in the bipartite graph that have a degree less than certain threshold.  In our results below, we assigned set a minimum degree to 10 for both users and businesses.  The reasoning is that users or business without enough edges implies they won't have strong bonds with others in their community.
+
+\subsection{Jaccard Index Thresholding}
+When projecting, we compute the Jaccard index between them to see if the bond is strong enough to create an edge.  Here, the Jaccard index is a statistical property of two users by computing the ratio of number of intersecting businesses to total businesses that these two users have in common.  We again apply a minimum threshold of 0.10, or 10\% of shared businesses.
+
+\begin{equation}
+Jaccard(A,B) = {{|A \cap B|}\over{|A \cup B|}}
+\end{equation}
+
+\section{User Credibility}
+
+TODO
+
+\section{Results}
+\label{sec:results}
+TODO
+
+
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.75\textwidth]{temp_results.png}
+  \caption{Peer Weight vs Difference (lower is better)}
+  \label{fig:social_degree}
+\end{figure}
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+TODO
+
+
+Preliminary code can be found on Github at \url{https://github.com/edmundyan/yelp}
+
+\printbibliography
+
+\end{document}
