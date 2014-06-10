@@ -32,17 +32,10 @@ Yelp is a website that provides business listings and allows customers to write 
 
 We think we can do a better job at providing a rating to users than just an average.  Yelp has accumulated a wealth of information on businesses, users, and activities between them, yet they use none of that information in providing better results for users.  Our approach will be to use community detection methods to analyze the social graph of friends and also the bipartite network of users to businesses to give a more personalized result.  Our hypothesis is that people in your community know what you like more than the rest of the population.  So if all of your friends are are raving about a particular restaurant, we think this will make it more likely that you will enjoy the restaurant as well.  Additionally, by analyzing the bipartite network, we can potentially unveil interesting pairings that would otherwise not be apparent.  Users who frequently visit the same restaurants as a particular user, shows a starking similarity in their food preferences.  We think that by categorizing users to communities, we can give more weight to the ratings from other users in the same community and thus provide a more accurate business rating.
 
-Section~\ref{sec:prevwork} will discuss some of the previous work in community detection.  Section~\ref{sec:data} will give a general overview of our dataset. We will present our methods in Section~\ref{sec:method} with results in \ref{sec:results}.  Finally, we will conclude and discuss future work in this area in Section~\ref{sec:conclusion}
-
-
 \section{Previous Work}
-\label{sec:prevwork}
+
 TODO
-
 TODO: Do we need to rewrite this since we use much different community detection algorithms?
-
-
-
 
 For this project, were going to be focusing on two main aspects of the Yelp data. First will be
 the social network of Yelp users and their friends. The second will be the bipartite network
@@ -56,7 +49,6 @@ of edges from the network, and the connected components of the remaining network
 
 
 \section{Data}
-\label{sec:data}
 
 Yelp has provided an academic dataset that contains a sample of their data from Phoenix, Arizona.  This dataset has 15,185 total businesses, 335,022 reviews, 70,817 users, and a slew of other information that we don't track in this study.  We construct two graphs from this data.  The first is a social network of users and their friends, with the 70,817 nodes, 151,516 edges and an average degree of 4.279.  As seen in the degree distribution of Figure~\ref{fig:social_degree}, the graph is scale-free and follows a power law distribution.
 
@@ -83,26 +75,26 @@ The second is a bipartite graph of users and businesses, with an edge connecting
 \endminipage\hfill
 \end{figure}
 
-We actually use a shrunken version of both graphs because of computational restrictions, which we will discuss later.
+We actually use a shrunken version of both graphs because of computational restrictions, which we will discuss in the next section.
 
-\section{Bipartite Graph}
-\label{sec:bipartite}
+\section{Methods}
 
-We first take a look at the bipartite graph of users and businesses.  In order to do community detection of users on this graph, we do a one-mode projection onto the Users.  Simply, if user A and user B both rate a business X, we add an edge between A and B in the projected graph.  The new graph only has user nodes.  This algorithm leads to an immensely dense graph, with a basic projection of the original bipartite graph having 2,945,687 edges with only 70,817 nodes.  We attempted community detection algorithms on this graph, but they were both highly time consuming and produced bad community results.  We thus add two methods to shrink this projection into a more usable graph.
+\subsection{Bipartite Graph}
 
-\subsection{Shrink}
-In shrink, we remove nodes (both users and businesses) in the bipartite graph that have a degree less than certain threshold.  In our results below, we assigned set a minimum degree to 10 for both users and businesses.  The reasoning is that users or business without enough edges implies they won't have strong bonds with others in their community.
-
-\subsection{Jaccard Index Thresholding}
-When projecting, we compute the Jaccard index between them to see if the bond is strong enough to create an edge.  Here, the Jaccard index is a statistical property of two users by computing the ratio of number of intersecting businesses to total businesses that these two users have in common.  We again apply a minimum threshold of 0.10, or 10\% of shared businesses.
+To do community detection on the bipartite graph, we first do a one-mode projection onto the Users.  Simply, if user A and user B both rate a business X, we add an edge between A and B in the projected graph; the new graph only has user nodes.  This algorithm leads to an immensely dense graph, with a projection of the original bipartite graph having 2,945,687 edges with only 70,817 nodes.  Community detection algorithms on this graph were both time consuming and produced bad results.  We thus add two methods to shrink this projection into a more usable graph.  The first is a "shrink" operation that removed nodes (both users and businesses) in the bipartite graph that have a degree less than certain threshold.  In our results below, we assigned the minimum degree to 10 for both users and businesses.  The reasoning is that users or business without enough edges won't have strong bonds with others in their community for this method to be effective. Secondly, when projecting, we compute the Jaccard index between the two users to see if the bond is strong enough to create an edge.  The Jaccard index is a statistical property of two users by computing the ratio of number of intersecting businesses to total businesses that these two users have in common.  We again apply a minimum threshold of 0.10, or 10\% of shared businesses.  After both of these methods, we are left with a graph of 5,571 nodes and 5,034 edges.
 
 \begin{equation}
 Jaccard(A,B) = {{|A \cap B|}\over{|A \cup B|}}
 \end{equation}
 
-\section{User Credibility}
+\subsection{Community Detection}
 
-TODO
+For community detection, we test out two different methods: label propogation\cite{gregory2010finding} and louvain\cite{blondel2008fast}.  In the figure below, we see a histogram of community size.  Idealy, I think we would have liked more medium sized networks rather than the small number of extremely large networks.  In this sense, with so many users in the same community, we really aren't getting that much personalization.  TODO add graphs.
+
+
+\subsection{User Credibility}
+
+TODO Leyuan
 
 \section{Results}
 \label{sec:results}
