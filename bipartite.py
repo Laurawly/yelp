@@ -248,8 +248,11 @@ def main():
   user_credibility, b_new_score = HITS.hits_score(B,Biz)
 
   print "all"
-  results.compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score,
-                   peer_weight=0.2, friend_weight = 0.2)
+  for i in range(8,11):
+    for j in range(0, 11 - i):
+      print i, j
+      results.compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score,
+                   peer_weight=float(i)/10, friend_weight = float(j)/10)
 
 # results.compareIterations(user_nodes, C, B, Biz, D, user_credibility, b_new_score, iteration=10000)
 

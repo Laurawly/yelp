@@ -13,33 +13,27 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
   diff_avgerage = []
 
   for i, user in enumerate(user_nodes):
-    print "%s / %s" %(i, len(user_nodes))
+    # print "%s / %s" %(i, len(user_nodes))
     community = C['byUser'][user]
-    if len(C['byGroup'][community]) < 5:
+    if len(C['byGroup'][community]) < 10:
       # only choose users that are in a reasonably large community
         continue
     if user not in D['byUser']:
       # User has no friend
-        print "no friends"
         continue
     social_community = D['byUser'][user]
-
+    if len(D['byGroup'][social_community]) < 10:
+      # only choose users that are in a reasonably large community
+        continue
     for business in B.neighbors(user):
       # 2. calculate the avg rating of this user's friends who rated this business
-      raters = B.neighbors(business)
-      peers = []
-      outsiders = []
-      friends = []
+      raters = set(B.neighbors(business))
+      # remove this user from the list
+      raters.remove(user)
 
-      for rater in raters:
-        if rater == user:
-          continue
-        if rater in C['byGroup'][community]:
-          # found a match!
-          peers.append(rater)
-        else: outsiders.append(rater)
-        if rater in D['byGroup'][social_community]:
-          friends.append(rater)
+      peers = set(raters).intersection(C['byGroup'][community])
+      outsiders = raters - peers
+      friends = set(raters).intersection(D['byGroup'][social_community])
 
       if len(peers) == 0:
         # didn't find any friends who rated this place
@@ -51,26 +45,20 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
       o_total = 0.
       r_total = 0.
       f_total = 0.
-      totalCredibility = 0.
-      o_totalCredibility = 0.
-      f_totalCredibility = 0.
       totalCredibility = sum([user_credibility[p] for p in peers])
       o_totalCredibility = sum([user_credibility[p] for p in outsiders])
       f_totalCredibility = sum([user_credibility[p] for p in friends])
 
-      for p in peers:
-        edge = B.get_edge_data(p, business)
-        total += edge['stars']*1./len(peers)
-      for p in outsiders:
-        edge = B.get_edge_data(p, business)
-        o_total += edge['stars']*1./len(outsiders)
-      for p in friends:
-        edge = B.get_edge_data(p, business)
-        f_total += edge['stars']*1./len(friends)
-      for p in raters:
-        edge = B.get_edge_data(p, business)
-        r_total += edge['stars']
-        # o_total += edge['stars']*user_credibility[p]/o_totalCredibility
+
+
+      total = sum(B.get_edge_data(p, business)['stars']*user_credibility[p]/totalCredibility
+                  for p in peers)
+      o_total = sum(B.get_edge_data(p, business)['stars']*user_credibility[p]/o_totalCredibility
+                  for p in outsiders)
+      f_total = sum(B.get_edge_data(p, business)['stars']*user_credibility[p]/f_totalCredibility
+                  for p in friends)
+
+
       avg_peer_value = total*peer_weight + \
                        f_total*friend_weight + \
                        o_total*(1-peer_weight-friend_weight)
@@ -80,9 +68,8 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
 
       # num_peers.append(len(peers))
       diff_peer.append(abs(edge['stars'] - roundratinghalf(avg_peer_value)))
-      # diff_yelp.append(abs(edge['stars'] - Biz[business]))
-      # diff_biz.append(abs(edge['stars'] - b_new_score[business]))
-      diff_avgerage.append(abs(edge['stars'] - roundratinghalf(float(r_total)/len(raters))))
+      diff_yelp.append(abs(edge['stars'] - Biz[business]))
+      diff_biz.append(abs(edge['stars'] - b_new_score[business]))
 
 
 
@@ -94,18 +81,14 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
   print np.mean(diff_peer),
   print np.std(diff_peer)
 
-  # print np.median(diff_yelp),
-  # print np.mean(diff_yelp),
-  # print np.std(diff_yelp)
+  print np.median(diff_yelp),
+  print np.mean(diff_yelp),
+  print np.std(diff_yelp)
 
 
-  # print np.median(diff_biz),
-  # print np.mean(diff_biz),
-  # print np.std(diff_biz)
-
-  print np.median(diff_avgerage),
-  print np.mean(diff_avgerage),
-  print np.std(diff_avgerage)
+  print np.median(diff_biz),
+  print np.mean(diff_biz),
+  print np.std(diff_biz)
 
 
 def compareIterations(user_nodes, C, B, Biz, D, user_credibility, b_new_score, iteration=10000):
