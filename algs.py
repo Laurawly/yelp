@@ -14,10 +14,11 @@ class Copra():
 
   http://www.cs.bris.ac.uk/~steve/networks/software/copra.html
   '''
-  def __init__(self, G, bipartite=False, filename=None):
+  def __init__(self, G, bipartite=False, filename=None, is_weighted=False):
     self.graph = G
     self.bipartite = bipartite
     self.filename = filename
+    self.is_weighted = is_weighted
 
   def run(self):
     if os.path.exists(self.filename):
@@ -26,9 +27,10 @@ class Copra():
         return
       else:
         # we have input file but no clusters
-        cmd = "java -cp %s COPRA %s %s -w" % \
+        cmd = "java -cp %s COPRA %s %s %s" % \
               (os.path.join(CWD, 'algorithms', 'copra.jar'), self.filename,
-               '-bi' if self.bipartite else '')
+               '-bi' if self.bipartite else '',
+               '-w' if self.is_weighted else '')
         print cmd
         subprocess.call(cmd, shell=True)
     else:
@@ -42,9 +44,10 @@ class Copra():
         fp.write("%s %s %s\n" % (e[0], e[1], e[2]['weight']*5))
       fp.close()
 
-      cmd = "java -cp %s COPRA %s %s -w" % \
+      cmd = "java -cp %s COPRA %s %s %s" % \
             (os.path.join(CWD, 'algorithms', 'copra.jar'), fp.name,
-             '-bi' if self.bipartite else '')
+             '-bi' if self.bipartite else '',
+             '-w' if self.is_weighted else '')
 
       print cmd
       subprocess.call(cmd, shell=True)
