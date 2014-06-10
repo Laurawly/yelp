@@ -12,13 +12,15 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
   diff_biz = []
   diff_avgerage = []
 
-  for user in user_nodes:
+  for i, user in enumerate(user_nodes):
+    print "%s / %s" %(i, len(user_nodes))
     community = C['byUser'][user]
-    if len(C['byGroup'][community]) < 10:
+    if len(C['byGroup'][community]) < 5:
       # only choose users that are in a reasonably large community
         continue
     if user not in D['byUser']:
       # User has no friend
+        print "no friends"
         continue
     social_community = D['byUser'][user]
 
@@ -69,7 +71,9 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
         edge = B.get_edge_data(p, business)
         r_total += edge['stars']
         # o_total += edge['stars']*user_credibility[p]/o_totalCredibility
-      avg_peer_value = total*peer_weight+f_total*friend_weight+o_total*(1-peer_weight-friend_weight)
+      avg_peer_value = total*peer_weight + \
+                       f_total*friend_weight + \
+                       o_total*(1-peer_weight-friend_weight)
 
       # compare the values
       edge = B.get_edge_data(user, business)
@@ -82,22 +86,22 @@ def compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score, peer_wei
 
 
 
-  print np.median(num_peers),
-  print np.mean(num_peers),
-  print np.std(num_peers)
+  # print np.median(num_peers),
+  # print np.mean(num_peers),
+  # print np.std(num_peers)
 
   print np.median(diff_peer),
   print np.mean(diff_peer),
   print np.std(diff_peer)
 
-  print np.median(diff_yelp),
-  print np.mean(diff_yelp),
-  print np.std(diff_yelp)
+  # print np.median(diff_yelp),
+  # print np.mean(diff_yelp),
+  # print np.std(diff_yelp)
 
 
-  print np.median(diff_biz),
-  print np.mean(diff_biz),
-  print np.std(diff_biz)
+  # print np.median(diff_biz),
+  # print np.mean(diff_biz),
+  # print np.std(diff_biz)
 
   print np.median(diff_avgerage),
   print np.mean(diff_avgerage),
@@ -153,7 +157,7 @@ def compareIterations(user_nodes, C, B, Biz, D, user_credibility, b_new_score, i
         continue
       if len(friends) == 0:
         continue
-    
+
       total = 0.
       o_total = 0.
       f_total = 0.

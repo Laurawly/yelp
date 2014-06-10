@@ -233,11 +233,6 @@ def avgDegree(G):
 def main():
   # load file
   B = loadBipartite()
-  avgDegree(B)
-  return
-
-
-
   B = shrinkNetworkx(B)
   proj = loadProjection(B)
   C = social.loadCommunity(proj, 'networkx_community.pickle')
