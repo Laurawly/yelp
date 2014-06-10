@@ -3,6 +3,7 @@ import os
 import random
 import networkx as nx
 import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 
 #local
@@ -173,9 +174,70 @@ def shrinkNetworkx(G, user_threshold=10, business_threshold=10):
   return G
 
 
+
+def avgDegree(G):
+  user_nodes = set(n for n,d in G.nodes(data=True) if d['bipartite']==0)
+  biz_nodes = set(G) - user_nodes
+  print "User Nodes: ",
+  print len(user_nodes)
+  print "Biz Nodes: ",
+  print len(biz_nodes)
+
+  print "Edges: ",
+  print G.number_of_edges()
+
+  # avg degree Users
+  degrees = collections.defaultdict(int)
+  total = 0
+  for node in user_nodes:
+    neighbors = G.neighbors(node)
+    degrees[len(neighbors)] += 1
+    total += len(neighbors)
+
+  max_degree = max(degrees.keys())
+  degrees_arr = (max_degree+1) * [0]
+  for index, count in degrees.iteritems():
+    degrees_arr[index] = count
+
+  print "Avg User node degreee:",
+  print float(total) / len(user_nodes)
+  plt.plot(range(max_degree+1), degrees_arr, '.')
+  plt.xscale('log', basex=2)
+  plt.xlabel('degree')
+  plt.yscale('log', basex=2)
+  plt.ylabel('# of people')
+  plt.savefig('user_degree_distribution.png')
+  plt.close()
+
+  # avg degree Business
+  degrees = collections.defaultdict(int)
+  for node in biz_nodes:
+    neighbors = G.neighbors(node)
+    degrees[len(neighbors)] += 1
+
+  max_degree = max(degrees.keys())
+  degrees_arr = (max_degree+1) * [0]
+  for index, count in degrees.iteritems():
+    degrees_arr[index] = count
+
+  print "Avg Biz node degreee:",
+  print float(total) / len(biz_nodes)
+  plt.plot(range(max_degree+1), degrees_arr, '.')
+  plt.xscale('log', basex=2)
+  plt.xlabel('degree')
+  plt.yscale('log', basex=2)
+  plt.ylabel('# of people')
+  plt.savefig('biz_degree_distribution.png')
+  plt.close()
+
 def main():
   # load file
   B = loadBipartite()
+  avgDegree(B)
+  return
+
+
+
   B = shrinkNetworkx(B)
   proj = loadProjection(B)
   C = social.loadCommunity(proj, 'networkx_community.pickle')
