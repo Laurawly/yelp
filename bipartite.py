@@ -180,7 +180,8 @@ def main():
   proj = loadProjection(B)
   C = social.loadCommunity(proj, 'networkx_community.pickle')
   Biz = loadBusinesses()
-
+  S = social.loadSocialNetwork()
+  D = social.loadCommunity(S, 'social_network_community.pickle')
   # copra = algs.Copra(proj, filename='copra10.txt')
   # copra.run()
   # C = copra.loadCommunity()
@@ -190,10 +191,10 @@ def main():
   user_credibility, b_new_score = HITS.hits_score(B,Biz)
 
   print "all"
-  results.compareAll(user_nodes, C, B, Biz, user_credibility, b_new_score,
-                   peer_weight=0.2)
+  results.compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score,
+                   peer_weight=0.2, friend_weight = 0.2)
 
-
+# results.compareIterations(user_nodes, C, B, Biz, D, user_credibility, b_new_score, iteration=10000)
 
 
 if __name__ == '__main__':
