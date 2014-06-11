@@ -233,22 +233,25 @@ def avgDegree(G):
 def main():
   # load file
   B = loadBipartite()
-  B = shrinkNetworkx(B)
+  # B = shrinkNetworkx(B)
   proj = loadProjection(B)
-  C = social.loadCommunity(proj, 'networkx_community.pickle')
+  # C = social.loadCommunity(proj, 'networkx_community.pickle')
+  copra = algs.Copra(proj, filename='copra10_bipart.txt', is_weighted=True)
+  copra.run()
+  C = copra.loadCommunity()
   Biz = loadBusinesses()
   S = social.loadSocialNetwork()
   D = social.loadCommunity(S, 'social_network_community.pickle')
-  # copra = algs.Copra(proj, filename='copra10.txt')
+  # copra = algs.Copra(S, filename='copra10_social.txt')
   # copra.run()
-  # C = copra.loadCommunity()
+  # D = copra.loadCommunity()
 
   user_nodes = proj.nodes()
 
   user_credibility, b_new_score = HITS.hits_score(B,Biz)
 
   print "all"
-  for i in range(8,11):
+  for i in range(6,11):
     for j in range(0, 11 - i):
       print i, j
       results.compareAll(user_nodes, C, B, Biz, D, user_credibility, b_new_score,

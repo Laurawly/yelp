@@ -19,6 +19,10 @@ projection stats for full graph
 70817
 2945687
 
+projection stats for full jaccard
+?
+?
+
 COPRA on shrink(10,10)
 is just 1 community wtf
 5571 vertices, 3659520 edges

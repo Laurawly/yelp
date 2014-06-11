@@ -41,7 +41,8 @@ class Copra():
         fp = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
       for e in self.graph.edges(data=True):
         # write "user_id bus_id"
-        fp.write("%s %s %s\n" % (e[0], e[1], e[2]['weight']*5))
+        fp.write("%s %s %s\n" % (e[0], e[1],
+                                 e[2]['weight']*5 if self.is_weighted else ''))
       fp.close()
 
       cmd = "java -cp %s COPRA %s %s %s" % \

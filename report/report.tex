@@ -1,5 +1,6 @@
 \documentclass[10pt]{article}
 
+\usepackage{amsmath}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \usepackage{url}
@@ -89,32 +90,76 @@ Jaccard(A,B) = {{|A \cap B|}\over{|A \cup B|}}
 
 \subsection{Community Detection}
 
-For community detection, we test out two different methods: label propogation\cite{gregory2010finding} and louvain\cite{blondel2008fast}.  In the figure below, we see a histogram of community size.  Idealy, I think we would have liked more medium sized networks rather than the small number of extremely large networks.  In this sense, with so many users in the same community, we really aren't getting that much personalization.  TODO add graphs.
+For community detection, we test out two different methods: label propogation\cite{gregory2010finding} and louvain\cite{blondel2008fast}.  In the Figures \ref{fig:networkx_community_dist} and \ref{fig:copra_community_dist}, we see a histogram of community size.  Our original hypothesis was that we would get good results with more medium sized networks as this would group users to a small community of other users they are closely related to, which is what label propogation gave us.  The louvain method ended up creating a handful of extremely large communities.  Unfortunately, the label propogation method did not work for the social graph, so we use the louvain method for the social graph throughout the study.  The size distribution is shown in Figure \ref{fig:social_community_dist}.
+
+\begin{figure}[ht]
+\minipage{0.49\textwidth}
+\includegraphics[scale=.4]{networkx_community_dist.png} 
+\caption{Community Size Distribution of projected graph using Louvain Method}
+\label{fig:networkx_community_dist}
+\endminipage\hfill
+\minipage{0.49\textwidth}
+\includegraphics[scale=.4]{copra_community_dist.png}
+\caption{Community Size Distribution of projected graph using label propogation}
+\label{fig:copra_community_dist}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[ht]
+\minipage{0.49\textwidth}
+\includegraphics[scale=.4]{social_community_dist.png} 
+\caption{Community Size Distribution of social graph using Louvain Method}
+\label{fig:social_community_dist}
+\endminipage\hfill
+\end{figure}
+
 
 
 \subsection{User Credibility}
+\label{sec:user_credibility}
 
 TODO Leyuan
 
 \section{Results}
 \label{sec:results}
-TODO
 
+To calculate a new business rating, we have three sets of people to pull information from: those inside our bipartite network community, those outside our bipartite network community, and those inside our social network community.  The weights of each group of users can be weighted differently.  We decided to test all different permuations of weights to see which one optimized the results the most.  For a certain weight permutation, we compute a new business score using Eq.\ref{avg_peer_value}.  For our results, we calculate this new business score for every user and every business and calculate the difference between what the user actually rated the business and what our new score is.  We imposed some size restrictions, such as forcing users to be in communities of at least 10 users or more.  The results for both community detection methods are shown in Figures \ref{fig:louvain_results} and \ref{fig:label_prop_results}.
+
+\begin{multline}
+\label{avg_peer_value}
+NewScore(U, B) = peer\_rating(U, B)*peer\_weight + outsider\_rating(U, B)*outsider\_weight + \\
+social\_rating(U, B) * social\_weight \\
+\end{multline}
+
+From the data, it's clear that our method is consistently worse than both Yelp and the HITS method.  The X axis is an index of a certain permutation.  A weight permutation of (0,0,1.0) would have an index of 0, while a permutation of (.1,0,.9) would have the index 11.  The Y axis is the mean difference between what a user rated a business and what we calculate that business score to be. The red 'Yelp' line is the difference to Yelp's standard rounded half-star rating; the yellow 'HITS' line is the difference to the HITS business score in Section \ref{sec:user_credibility}; the blue line is our diff using community detection.
+
+Our best results occurred when peer\_weight=0.2, outsider\_weight=0.8, and social\_weight=0.0 for both detection methods, which is permutation index 21.
 
 \begin{figure}[ht]
   \centering
-    \includegraphics[width=0.75\textwidth]{temp_results.png}
-  \caption{Peer Weight vs Difference (lower is better)}
-  \label{fig:social_degree}
+    \includegraphics[width=0.75\textwidth]{louvain_results.png}
+  \caption{Mean difference between Louvain method and actual ratings}
+  \label{fig:louvain_results}
 \end{figure}
 
+\begin{figure}[ht]
+  \centering
+    \includegraphics[width=0.75\textwidth]{label_prop_results.png}
+  \caption{Mean difference between label propogation method and actual ratings (lower is better)}
+  \label{fig:label_prop_results}
+\end{figure}
 
 \section{Conclusion}
 \label{sec:conclusion}
-TODO
+
+It's unfortunate that our results were not very good, and there are many things that could be improved on.  For one, because of our reliance on networkx and python, we were quite computationally limited.  This meant we were working with an incomplete set of data.  If we had more computation power or wrote our code more efficiently, it would've been amazing to see how all of our tunable paramaters changes the final mean difference.  Things like our Jaccard threshold, min community size, min number of friends, min number of reviews, etc.  From our proposal, we really wanted to see if there was some phase transition when our method would suddenly become more effective once a user hit a sweet spot of friends/reviews - unfortunately we had neither the time nor coding skills to implement this efficiently.
+
+We would've loved to do more community detection algorithms and see what difference that would've made.  We did not fully understand the clustering algorithms we were doing, and some of the attributes like weights and overlapping communities weren't utilized to its fullest.
+
+While there are many improvements on the technical side, if we take our results at fact value, we can still come to an interesting conclusion.  From the data, it would seem that your friends or those people who review similar restaurants as you are no better predictors of your rating than the general population.  In fact, as we start including more and more weight to peer\_weight than outsider\_weight (which can be seen as the minimum peeks in the difference graphs), we slowly increase.  In other words, the general concensus on a restaurant tends to be a more accurate predictor for any user simply because of larger sample size.
 
 
-Preliminary code can be found on Github at \url{https://github.com/edmundyan/yelp}
+Code for this project can be viewed at \url{https://github.com/edmundyan/yelp}
 
 \printbibliography
 
