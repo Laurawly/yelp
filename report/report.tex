@@ -6,6 +6,7 @@
 \usepackage{url}
 \usepackage{setspace}
 \usepackage{biblatex} % A library for bibliography commands.
+\usepackage{placeins}
 
 \doublespacing
 
@@ -35,19 +36,13 @@ We think we can do a better job at providing a rating to users than just an aver
 
 \section{Previous Work}
 
-TODO
-TODO: Do we need to rewrite this since we use much different community detection algorithms?
-
-For this project, were going to be focusing on two main aspects of the Yelp data. First will be
+For this project, we're going to be focusing on two main aspects of the Yelp data. First will be
 the social network of Yelp users and their friends. The second will be the bipartite network
 connecting users and businesses, where edges are reviews by that user to the business
 in question. After detecting communities in this two graphs, we are going to personalize
 the business stars according to which community the user is in. For the first part, we found different models
-for community detection. In \cite{fortunato2010community}, they give a thorough exposition of community detection methods. In \cite{newman2004finding}, several community detection methods like natural divisions of network nodes
-into densely connected subgroups, are studied. The algorithm involves iterative removal
-of edges from the network, and the connected components of the remaining network are the communities. For the second part, In \cite{liu2009community}, they proposed a fast algorithm called LP\&BRIM for community detection in large-scale bipartite networks. It is based on a joint strategy of two developed algorithms -- label propagation (LP), a very fast community detection algorithm, and BRIM, an algorithm for generating better community structure by recursively inducing divisions between the two types of nodes in bipartite networks. And this algorithm successfully finds meaningful community structures in large-scale bipartite networks in reasonable time limit. But there's a limit of time to implement their algorithm. If we evaluate the user directly instead of the reviews she wrote, the bipartite structure between users and businesses will be similar to the hub and authority set-up in HITS.
-
-
+for community detection. In \cite{blondel2008fast}, they introduced the louvain method which is based on modularity optimization. It outperforms other known community detection methods in terms of computation time which is a good fit for the large yelp social network. 
+For the second part, we want to evaluate the user's credibility directly instead of the reviews he/she wrote, and thus the bipartite structure between users and businesses is similar to the hub and authority set-up in HITS\cite{newman2004finding}. As the current existing community detection methods in bipartite graph are quite slow for large data like yelp, we decide to transform the users-to-businesses bipartite graph to a  users-to-users social graph by using Jacard similarity. And the label propagation method in \cite{gregory2010finding} works for the second graph for it targets not necessarily on dense graphs and it can detect overlapping communities which happens for yelp users.  
 
 \section{Data}
 
@@ -114,11 +109,23 @@ For community detection, we test out two different methods: label propogation\ci
 \end{figure}
 
 
-
+\FloatBarrier
 \subsection{User Credibility}
 \label{sec:user_credibility}
 
-TODO Leyuan
+In our implementation, we use a HITS-based scoring algorithm from \cite{StanfordCS224wYelp} to obtain the user credibility and business new star. Instead of using Java, we implement it in python and it turned out to be very fast by operating it in an EM manner and with the stopping criteria 99\% businesses' new star changing less than 1\%. In the method, the user and business are acting as the hub and authority roles in HITS algorithm. Firstly, we calculate the user credibility from the business every user has reviewed before. If $Biz=\{b, where user has reviewed\}$, is the business set every user has reviewed, $star_{b}[i]$ is the score each user i gives to business b, and $S_{b}$ is the original Yelp star for business b. The credibility of user i is calculated as follows: 
+\begin{equation*}
+C[i] = \frac{1}{1+\sum\nolimits_{b \in Biz} (star_{b}[i]-S_{b})}
+\end{equation*}
+The +1 in the denominator is used to smooth the user credibility in case of $star_{b}[i]==S_{b}$. We can thus get a user credibility for each user. \par 
+Next step, we calculate the business new star according to the updated user credibility. If $U_{b}$ is the set of users who have reviewed the business b, we can get the weighted score by the following equation:
+\begin{equation*}
+S_{b} = \frac{\sum\nolimits_{u_{i}\in U_{b}}\times star_{b}[i]}{\sum\nolimits_{u_{i}}}
+\end{equation*}
+We also need to normalize and scale the user credibility to a maximum of 5 by the following equation:
+\begin{equation*}
+u_{i} = \frac{u_{i}}{max_{j\in v}u_{j}}\times 5
+\end{equation*}
 
 \section{Results}
 \label{sec:results}
